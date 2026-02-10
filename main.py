@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 data= pd.read_csv('./data/customer_support_tickets.csv')
 # data pre-processing
 
@@ -17,14 +18,41 @@ def preProcessData(data):
     }
 
 
-    data.rename(columns={"Ticket Type":"label", "Ticket Subject":"subject", "Ticket Description":"description"}, inplace=True)
+    data.rename(columns={"Ticket Type":"label",}, inplace=True)
     data["label"]= data["label"].map(ticket_type_map)   # more beautification 
-    data["text"]=data["subject"] +" " + data["description"]
-    data.drop(columns=["subject", "description"], inplace=True) # remove subject and description columns
+    data["text"] = (
+        "SUBJECT: " + data["Ticket Subject"].fillna("") +
+        " DESCRIPTION: " + data["Ticket Description"].fillna("")
+    )
+    data.drop(columns=["Ticket Subject", "Ticket Description"], inplace=True) # remove subject and description columns
+
+
+
+    # remove placeholders
+
+    data["text"] = data["text"].str.replace(
+        r"\{.*?\}", "", regex=True
+    )
+
+    # removing the greeting and closing statements
+    boilerplate = [
+    "I'm having an issue with",
+    "Please assist",
+    "Thank you",
+    "Thanks"
+    ]
+
+    for phrase in boilerplate:
+        data["text"] = data["text"].str.replace(
+            phrase, "", regex=False
+        )
+    data["text"] = data["text"].str.replace("\n", " ", regex=False)
     print(data.head())
+    data.to_csv("./data/preprocessed_tickets.csv", index=False)
+
   
 
-
+    
 
 
 if __name__=="__main__":
