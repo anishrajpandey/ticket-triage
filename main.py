@@ -1,7 +1,9 @@
 import pandas as pd
-import re
+from sklearn.model_selection import train_test_split
+
 data= pd.read_csv('./data/customer_support_tickets.csv')
-# data pre-processing
+
+
 
 def preProcessData(data):
     data=data[["Ticket Subject",
@@ -47,13 +49,14 @@ def preProcessData(data):
             phrase, "", regex=False
         )
     data["text"] = data["text"].str.replace("\n", " ", regex=False)
-    print(data.head())
     data.to_csv("./data/preprocessed_tickets.csv", index=False)
 
   
 
     
 
+preProcessData(data)
+x= data["text"]
+y= data["label"]
 
-if __name__=="__main__":
-    preProcessData(data)
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42, stratify=y)
