@@ -54,19 +54,27 @@ def preProcessData(data):
         )
     data["text"] = data["text"].str.replace("\n", " ", regex=False)
     data.to_csv("./data/preprocessed_tickets.csv", index=False)
+    return data
 
   
 
     
 
-preProcessData(data)
+data = preProcessData(data)
 x= data["text"]
 y= data["label"]
 
 X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42, stratify=y)
 
-vectorizer=TfidfVectorizer(ngram_range=(1, 2), min_df=5, max_df=0.9, stop_words="English", sublinear_tf=True)
+vectorizer=TfidfVectorizer(ngram_range=(1, 2), min_df=5, max_df=0.9, stop_words='english', sublinear_tf=True)
 x_train_vec=vectorizer.fit_transform(X_train)
 x_test_vec=vectorizer.fit(X_test)
 
 
+model = LogisticRegression(
+    max_iter=1000,
+    class_weight="balanced",
+    n_jobs=-1
+)
+model.fit(x_train_vec, y_train)
+print("model trained with data")
