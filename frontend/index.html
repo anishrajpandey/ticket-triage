@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ticket Triage Demo</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 500px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102,126,234,0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 10px;
+            border: none;
+            background: #667eea;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f4f4f4;
+            display: none;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: white;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .auto {
+            background: #38a169;
+        }
+
+        .review {
+            background: #e53e3e;
+        }
+
+        .confidence {
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Customer Support Ticket Classifier</h2>
+
+    <textarea id="ticket" rows="5" placeholder="Enter ticket text here..."></textarea>
+
+    <button onclick="predict()">Predict Category</button>
+
+    <div id="resultBox" class="result">
+        <strong>Predicted Category:</strong>
+        <div id="category"></div>
+
+        <div class="confidence">
+            Confidence: <span id="confidence"></span>
+        </div>
+
+        <div id="statusBadge"></div>
+    </div>
+</div>
+
+<script>
+    async function predict() {
+        const text = document.getElementById("ticket").value;
+
+        if (!text.trim()) return;
+
+        const response = await fetch("http://127.0.0.1:8000/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("category").innerText = data.predicted_category;
+        document.getElementById("confidence").innerText = (data.confidence * 100).toFixed(2) + "%";
+
+        const badge = document.getElementById("statusBadge");
+        badge.className = "badge " + (data.status === "auto_routed" ? "auto" : "review");
+        badge.innerText = data.status === "auto_routed" ? "Auto Routed" : "Needs Human Review";
+
+        document.getElementById("resultBox").style.display = "block";
+    }
+</script>
+
+</body>
+</html>

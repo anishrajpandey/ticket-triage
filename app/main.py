@@ -3,6 +3,8 @@ from pydantic import BaseModel
 import joblib
 import json
 import numpy as np
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
@@ -42,3 +44,13 @@ def predict(ticket: TicketRequest):
         "status": status
         
     }
+
+
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
