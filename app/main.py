@@ -12,7 +12,7 @@ model = joblib.load("models/ticket_model.pkl")
 with open("models/label_names.json") as f:
     label_names = json.load(f)
 
-CONFIDENCE_THRESHOLD =0;
+CONFIDENCE_THRESHOLD =0.3;
 
 
 class TicketRequest(BaseModel):
