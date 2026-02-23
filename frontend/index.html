@@ -326,33 +326,7 @@
     }
     textarea::placeholder { color: var(--muted); }
 
-    .ticket-meta {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-    .meta-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 6px 12px;
-    }
-    .meta-chip select, .meta-chip input {
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 12px;
-      font-family: 'DM Sans', sans-serif;
-      outline: none;
-      cursor: pointer;
-    }
-    .meta-chip select option { background: var(--surface2); }
+
 
     .classify-btn {
       width: 100%;
@@ -715,7 +689,8 @@
       <div class="hero-tag">Intelligent Routing System</div>
       <h1>Route every ticket to the <em>right team</em></h1>
       <p class="hero-desc">
-        TF-IDF powered multiclass classification that automatically triages incoming support tickets — fast, interpretable, and production-ready.
+        TF-IDF powered multiclass classification that automatically triages incoming support tickets — fast, interpretable, and production-ready.<br><br>
+        <span style="color: var(--accent);">Custom designed for banking systems using the banking77 dataset from HuggingFace.</span>
       </p>
       <div class="hero-stats">
         <div class="stat">
@@ -785,26 +760,7 @@
         <textarea id="ticketInput" placeholder="Type or paste a support ticket here...&#10;&#10;e.g. 'I was charged twice for my last order and I need a refund immediately.'"
         ></textarea>
 
-        <div class="ticket-meta">
-          <div class="meta-chip">
-            <span>🏷️</span>
-            <select id="prioritySelect">
-              <option>Low Priority</option>
-              <option>Medium Priority</option>
-              <option selected>High Priority</option>
-              <option>Critical</option>
-            </select>
-          </div>
-          <div class="meta-chip">
-            <span>📡</span>
-            <select id="channelSelect">
-              <option>Email</option>
-              <option selected>Chat</option>
-              <option>Phone</option>
-              <option>Portal</option>
-            </select>
-          </div>
-        </div>
+
 
         <div class="presets">
           <div class="presets-label">Quick examples</div>
