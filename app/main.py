@@ -27,8 +27,11 @@ def read_root():
 @app.post("/predict")
 def predict(ticket: TicketRequest):
     probs = model.predict_proba([ticket.text])[0]
-    top_idx = np.argmax(probs)
-
+    
+    # Get top 5 indices
+    top_indices = np.argsort(probs)[::-1][:5]
+    
+    top_idx = top_indices[0]
     confidence = float(probs[top_idx])
     category = label_names[top_idx]
 
@@ -38,11 +41,13 @@ def predict(ticket: TicketRequest):
         else "needs_human_review"
     )
 
+    scores = {label_names[i]: float(probs[i]) for i in top_indices}
+
     return {
         "predicted_category": category,
         "confidence": confidence,
-        "status": status
-        
+        "status": status,
+        "scores": scores
     }
 
 

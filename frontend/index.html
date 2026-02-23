@@ -727,7 +727,7 @@
           <div class="stat-label">Latency</div>
         </div>
         <div class="stat">
-          <div class="stat-val">8<span>+</span></div>
+          <div class="stat-val">77</div>
           <div class="stat-label">Categories</div>
         </div>
       </div>
@@ -912,35 +912,30 @@
     security:  { icon: "🔒", name: "Security & Fraud", color: "#f87171" }
   };
 
-  // Simulated model behavior
-  function simulateClassification(text) {
-    const t = text.toLowerCase();
-    const scores = {
-      billing:   score(t, ['charged','charge','payment','invoice','bill','subscription','fee','credit card']),
-      technical: score(t, ['crash','error','bug','broken','not working','api','upload','code','app','issue']),
-      shipping:  score(t, ['order','deliver','shipment','tracking','warehouse','package','shipped','arrive']),
-      account:   score(t, ['account','login','password','locked','access','reset','email','profile']),
-      refund:    score(t, ['refund','return','money back','reimburse','returned','cancel']),
-      security:  score(t, ['security','hack','compromised','suspicious','fraud','unauthorized','freeze','alert'])
-    };
-    const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
-    const total = sorted.reduce((s,[,v]) => s+v, 0) || 1;
-    const normalized = sorted.map(([k,v]) => [k, v/total]);
-    // Add noise
-    const final = normalized.map(([k,v]) => [k, Math.max(0.01, v + (Math.random()-0.5)*0.04)]);
-    const tot2 = final.reduce((s,[,v])=>s+v,0);
-    return final.map(([k,v])=>[k, v/tot2]).sort((a,b)=>b[1]-a[1]);
-  }
-
-  function score(text, keywords) {
-    return keywords.reduce((s,kw) => s + (text.includes(kw) ? 1 + (text.split(kw).length-1)*0.5 : 0), 0) + 0.05;
+  // Fallback function for generating a consistent modern color and formatting for dynamic categories
+  function getCategoryVisuals(key) {
+    // If it's one of the presets, return it
+    if (departments[key]) return departments[key];
+    
+    // Otherwise generate it dynamically based on the key
+    const formattedName = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    
+    // Generate a consistent hue based on string characters
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+        hash = key.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    const color = `hsl(${hue}, 70%, 65%)`;
+    
+    return { icon: "🎫", name: formattedName, color: color };
   }
 
   function loadPreset(key) {
     document.getElementById('ticketInput').value = presets[key];
   }
 
-  function classify() {
+  async function classify() {
     const text = document.getElementById('ticketInput').value.trim();
     if (!text) {
       document.getElementById('ticketInput').focus();
@@ -951,23 +946,36 @@
     btn.classList.add('loading');
     btn.innerHTML = '<span class="spinner"></span>Classifying...';
 
-    setTimeout(() => {
-      const results = simulateClassification(text);
-      const [topKey, topConf] = results[0];
-      const dept = departments[topKey];
-      const conf = Math.min(0.99, topConf);
-      const confPct = Math.round(conf * 100);
-      const threshold = 0.75;
-      const isAuto = conf >= threshold;
+    try {
+      const response = await fetch('http://127.0.0.1:8000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
 
-      let scoresHTML = results.map(([k,v], i) => {
-        const d = departments[k];
+      if (!response.ok) throw new Error("API error");
+      const data = await response.json();
+      
+      const topKey = data.predicted_category;
+      const conf = data.confidence;
+      const confPct = Math.round(conf * 100);
+      const isAuto = data.status === "auto_routed";
+      
+      const dept = getCategoryVisuals(topKey);
+
+      // Create scores HTML from data.scores
+      const scoresList = Object.entries(data.scores || {}).sort((a,b) => b[1] - a[1]);
+      
+      let scoresHTML = scoresList.map(([k,v], i) => {
+        const d = getCategoryVisuals(k);
         const pct = Math.round(v*100);
         return `
           <div class="score-row">
-            <div class="score-dept">${d.icon} ${d.name.split(' ')[0]}</div>
+            <div class="score-dept" style="color: ${d.color}; font-weight: 500;">
+              ${d.icon} ${d.name.length > 15 ? d.name.substring(0, 15) + '...' : d.name}
+            </div>
             <div class="score-bar-bg">
-              <div class="score-bar-fill ${i===0?'top':''}" style="width:${pct}%"></div>
+              <div class="score-bar-fill ${i===0?'top':''}" style="width:${pct}%; ${i !== 0 ? `background: ${d.color}` : ''}"></div>
             </div>
             <div class="score-pct">${pct}%</div>
           </div>`;
@@ -976,9 +984,9 @@
       document.getElementById('resultContent').innerHTML = `
         <div class="fade-in" style="display:flex;flex-direction:column;gap:14px">
           <div class="result-main">
-            <div class="result-icon">${dept.icon}</div>
+            <div class="result-icon" style="background: ${dept.color}22; color: ${dept.color};">${dept.icon}</div>
             <div>
-              <div class="result-dept">${dept.name}</div>
+              <div class="result-dept" style="color: ${dept.color};">${dept.name}</div>
               <div class="result-action ${isAuto ? 'auto' : 'review'}">
                 ${isAuto ? '⚡ Auto-routed' : '👁 Queued for human review'}
               </div>
@@ -991,11 +999,11 @@
               <span class="conf-value">${confPct}%</span>
             </div>
             <div class="conf-track">
-              <div class="conf-fill" id="confFill"></div>
+              <div class="conf-fill" id="confFill" style="background: linear-gradient(90deg, ${dept.color}88, ${dept.color});"></div>
             </div>
             <div class="threshold-marker">
               <div class="threshold-line"></div>
-              <div class="threshold-text">THRESHOLD 75%</div>
+              <div class="threshold-text">THRESHOLD 30%</div>
             </div>
           </div>
 
@@ -1020,9 +1028,18 @@
         setTimeout(() => { el.style.width = target; }, 100 + i * 60);
       });
 
+    } catch (e) {
+      console.error(e);
+      document.getElementById('resultContent').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon" style="opacity: 0.8;">❌</div>
+          <div class="empty-text" style="color: var(--danger);">Error calling predict API. Is backend running?</div>
+        </div>
+      `;
+    } finally {
       btn.classList.remove('loading');
       btn.innerHTML = 'Classify Ticket →';
-    }, 900);
+    }
   }
 
   // Allow Enter to classify
