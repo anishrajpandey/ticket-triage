@@ -4,13 +4,19 @@ import joblib
 import json
 import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 
 app = FastAPI()
 
-# Load model once at startup
-model = joblib.load("models/ticket_model.pkl")
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+
+MODEL_PATH = os.path.join(ROOT_DIR, "models", "ticket_model.pkl")
+
+# Load model once at startup
+model = joblib.load(MODEL_PATH)
 with open("models/label_names.json") as f:
     label_names = json.load(f)
 

@@ -26,10 +26,14 @@ pipeline = Pipeline([
     ))
 ])
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+
+LABEL_PATH = os.path.join(ROOT_DIR, "models", "label_names.json")
+
 pipeline.fit(X_train, y_train)
 
 joblib.dump(pipeline, "models/ticket_model.pkl")
 
-with open("models/label_names.json", "w") as f:
+with open(LABEL_PATH, "w") as f:
     json.dump(label_names, f)
-
