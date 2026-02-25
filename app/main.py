@@ -14,6 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
 
 MODEL_PATH = os.path.join(ROOT_DIR, "models", "ticket_model.pkl")
+LABEL_PATH = os.path.join(ROOT_DIR, "models", "label_names.json")
 
 # Load model once at startup
 model = joblib.load(MODEL_PATH)
