@@ -1,68 +1,145 @@
-# Customer Support Ticket Triage
+# Customer Support Ticket Triage API
 
-A production-oriented NLP project that classifies incoming customer support tickets into the correct department using classical machine learning techniques. The system includes confidence-based routing to defer low-confidence predictions to human review.
+A deployed machine learning microservice that classifies incoming customer support tickets into predefined departments using classical NLP techniques.
 
----
+**Live Demo:**  
+https://anishrajpandey.github.io/ticket-triage/
 
-## Problem Statement
+<img width="1148" height="673" alt="image" src="https://github.com/user-attachments/assets/7ebeca0c-0ecf-4d9a-a87f-e5dac48df2cc" />
 
-Customer support teams receive large volumes of unstructured text tickets that must be routed to the correct department (e.g. Billing, Technical Support, Account Issues). Manual triaging is slow, error-prone, and does not scale.
+**Live API:**  
+https://ticket-triage-lltp.onrender.com/
 
-This project builds a **multiclass text classification system** to automatically route tickets while minimizing the risk of incorrect assignments.
-
----
-
-## Scope (V1)
-
-- Pure text classification (no LLMs, no transformers)
-- Multiclass routing into predefined support categories
-- Confidence-based fallback to human review
-- Model served via a REST API
-
-**Out of scope**
-- Auto-generated responses
-- Ticket prioritization
-- Language translation
-- Large language models
 
 ---
 
-## Dataset
+## Overview
 
-The model is trained on a public customer support ticket dataset containing:
-- Free-form text (subject + description)
-- Pre-labeled support categories
+Customer support systems receive large volumes of unstructured text requests that must be routed to the correct department (e.g., Billing, Technical Support, Account Issues). Manual triaging does not scale and introduces routing errors.
 
-The dataset is intentionally noisy to reflect real-world customer input.
+This project implements a production-style text classification service that:
+
+- Predicts ticket category  
+- Returns prediction confidence  
+- Routes low-confidence cases to human review  
+
+The objective is not just high accuracy, but reducing costly misrouting in real workflows.
 
 ---
 
-## Approach
+## System Architecture
+Client (UI / curl)
+↓
+FastAPI REST Service
+↓
+TF-IDF Vectorizer
+↓
+Logistic Regression (Multiclass)
+↓
+Confidence Threshold Logic
 
+
+
+### Components
+
+- **Backend:** FastAPI + Gunicorn (deployed on Render)
+- **Model:** Scikit-learn pipeline (TF-IDF + Logistic Regression)
+- **Frontend:** Static demo UI (GitHub Pages)
+- **Training Script:** Offline training module
+- **Artifacts:** Serialized model + label map stored in `/models`
+
+The API loads trained artifacts at startup and serves inference requests.
+
+---
+
+## API Usage
+
+### Endpoint
+
+`POST /predict`
+
+### Example Request
+
+```json
+{
+  "text": "My internet connection keeps dropping"
+}
+```
+Example Response (Auto Assigned)
+```json
+{
+  "predicted_category": "Technical Support",
+  "confidence": 0.87,
+  "status": "auto_assigned"
+}
+```
+
+Example Response (Human Review)
+```json
+{
+  "predicted_category": "Billing",
+  "confidence": 0.42,
+  "status": "human_review"
+}
+```
 ### Text Representation
-- TF-IDF vectorization
-- Unigrams and bigrams
 
-### Models
-- Logistic Regression (multinomial) as baseline
-- Linear classifiers chosen for interpretability and efficiency
+TF-IDF vectorization
+Unigrams + bigrams
+Sparse feature matrix
 
-### Evaluation Metrics
-- Macro F1-score (primary)
-- Per-class precision and recall
-- Confusion matrix
+**Model**: Multinomial Logistic Regression
 
-Accuracy is not used as a primary metric due to class imbalance.
+Why not transformers?
 
----
+- [ ] The problem scope does not require deep contextual modeling.
 
-## Confidence-Based Routing
+- [ ] Classical ML is faster to train, cheaper to deploy, and easier to debug.
 
-Predictions below a configurable confidence threshold are routed to **human review** instead of being auto-assigned.
+- [ ] The objective is reliable routing, not semantic generation.
 
-This reduces misrouting risk and reflects real-world deployment constraints.
 
----
+**Deployment**
+- Backend Hosted on Render (Python Web Service)
+- Static UI Hosted with Github Pages
+- Interactive API docs available at /docs
 
-API : https://ticket-triage-lltp.onrender.com/
-UI : tbd
+## Limitations
+
+- No automatic response generation
+- No multilingual support
+- No ticket prioritization
+- No retraining pipeline
+- No database persistence
+
+
+## Local Development
+```python
+
+pip install -r requirements.txt
+
+uvicorn app.main:app --reload
+```
+
+Visit : 
+```code
+GET http://127.0.0.1:8000/docs
+POST http://127.0.0.1:8000/predict
+
+```
+
+
+
+
+
+##Summary
+
+- This project demonstrates:
+- End-to-end ML workflow (training → serialization → deployment)
+- Clean separation between training and inference
+- Confidence-aware routing logic
+- Publicly deployed ML microservice
+- Production-style dependency management
+
+Developed with ❤️ by Anish. Feel free to fork, star and give me feedback on my project. 
+
