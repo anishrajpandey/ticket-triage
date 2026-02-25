@@ -18,6 +18,8 @@ LABEL_PATH = os.path.join(ROOT_DIR, "models", "label_names.json")
 
 # Load model once at startup
 model = joblib.load(MODEL_PATH)
+
+
 with open(LABEL_PATH) as f:
     label_names = json.load(f)
 

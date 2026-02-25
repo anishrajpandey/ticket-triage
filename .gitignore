@@ -28,10 +28,8 @@ data/processed/
 # ------------------------------
 # Model artifacts
 # ------------------------------
-models/*.joblib
-models/*.pkl
-models/*.pt
-models/*.h5
+
+
 
 # ------------------------------
 # Logs & outputs
