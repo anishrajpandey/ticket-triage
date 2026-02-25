@@ -17,7 +17,7 @@ MODEL_PATH = os.path.join(ROOT_DIR, "models", "ticket_model.pkl")
 
 # Load model once at startup
 model = joblib.load(MODEL_PATH)
-with open("models/label_names.json") as f:
+with open(LABEL_PATH) as f:
     label_names = json.load(f)
 
 CONFIDENCE_THRESHOLD =0.3;

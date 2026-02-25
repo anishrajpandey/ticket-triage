@@ -5,7 +5,6 @@ from sklearn.linear_model import LogisticRegression
 from datasets import load_dataset
 import json
 import os
-
 dataset = load_dataset("banking77")
 
 X_train = dataset["train"]["text"]
@@ -31,10 +30,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
 
 LABEL_PATH = os.path.join(ROOT_DIR, "models", "label_names.json")
+MODEL_PATH = os.path.join(ROOT_DIR, "models", "ticket_model.pkl")
 
 pipeline.fit(X_train, y_train)
 
-joblib.dump(pipeline, "models/ticket_model.pkl")
+joblib.dump(pipeline, MODEL_PATH)
+
 
 with open(LABEL_PATH, "w") as f:
     json.dump(label_names, f)
+
