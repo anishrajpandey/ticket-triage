@@ -5,7 +5,6 @@ A deployed machine learning microservice that classifies incoming customer suppo
 **Live Demo:**  
 <a href="https://anishrajpandey.github.io/ticket-triage/" target="_blank">https://anishrajpandey.github.io/ticket-triage </a>
 
-https://anishrajpandey.github.io/ticket-triage/
 
 <img width="1148" height="673" alt="image" src="https://github.com/user-attachments/assets/7ebeca0c-0ecf-4d9a-a87f-e5dac48df2cc" />
 
